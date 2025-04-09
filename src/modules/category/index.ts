@@ -9,6 +9,8 @@ import { Sequelize } from "sequelize";
 import { CategoryHttpService } from "./infras/transport/http-service";
 import { CategoryUseCase } from "./usecase";
 import { CategoryRepository } from "./infras/repository/repo";
+import { ServiceContext } from "@share/interface/service-context";
+import { UserRole } from "@share/interface";
 export const setupCategoryModule = (sequelize: Sequelize) => {
   init(sequelize);
   const router = Router();
@@ -20,25 +22,36 @@ export const setupCategoryModule = (sequelize: Sequelize) => {
   return router;
 };
 
-export const setupCategoryHexagon = (sequelize: Sequelize) => {
+export const setupCategoryHexagon = (
+  sequelize: Sequelize,
+  sctx: ServiceContext
+) => {
   init(sequelize);
 
   const repository = new CategoryRepository(sequelize, modelName);
   const useCase = new CategoryUseCase(repository);
   const httpService = new CategoryHttpService(useCase);
   const router = Router();
-  router.get("/categories", httpService.listCategoriesApi.bind(httpService));
+  const mdlFactory = sctx.mdlFactory;
+  const adminChecker = mdlFactory.allowRoles([UserRole.ADMIN]);
+  router.get(
+    "/categories",
+    adminChecker,
+    httpService.listCategoriesApi.bind(httpService)
+  );
   router.get(
     "/categories/:id",
     httpService.getDetailCategoryAPI.bind(httpService)
   );
-  router.patch("/categories/:id", updateCategoryApi);
+  router.patch("/categories/:id", adminChecker, updateCategoryApi);
   router.post(
     "/categories",
+    adminChecker,
     httpService.createANewCategoryApi.bind(httpService)
   );
   router.delete(
     "/categories/:id",
+    adminChecker,
     httpService.deleteCategoryApi.bind(httpService)
   );
   return router;

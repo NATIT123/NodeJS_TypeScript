@@ -11,13 +11,13 @@ import {
 } from "./error";
 
 export const ProductCreateSchema = z.object({
-  name: z.string().min(2, ErrNameMustBeAtLeast2Characters),
-  price: z.number().positive(ErrPriceMustBePositive),
+  name: z.string().min(2, ErrNameMustBeAtLeast2Characters.message),
+  price: z.number().positive(ErrPriceMustBePositive.message),
   colors: z.string().optional(),
-  salePrice: z.number().nonnegative(ErrSalePriceMustBeNonnegative),
-  quantity: z.number().int().nonnegative(ErrQuantityMustBeNonnegative),
-  brandId: z.string().uuid(ErrBrandIdMustBeValidUUID).optional(),
-  categoryId: z.string().uuid(ErrCategoryIdMustBeValidUUID).optional(),
+  salePrice: z.number().nonnegative(ErrSalePriceMustBeNonnegative.message),
+  quantity: z.number().int().nonnegative(ErrQuantityMustBeNonnegative.message),
+  brandId: z.string().uuid(ErrBrandIdMustBeValidUUID.message).optional(),
+  categoryId: z.string().uuid(ErrCategoryIdMustBeValidUUID.message).optional(),
   content: z.string().optional(),
   description: z.string().optional(),
 });
@@ -25,17 +25,20 @@ export const ProductCreateSchema = z.object({
 export type ProductCreateDTO = z.infer<typeof ProductCreateSchema>;
 
 export const ProductUpdateSchema = z.object({
-  name: z.string().min(2, ErrNameMustBeAtLeast2Characters).optional(),
-  price: z.number().positive(ErrPriceMustBePositive).optional(),
+  name: z.string().min(2, ErrNameMustBeAtLeast2Characters.message).optional(),
+  price: z.number().positive(ErrPriceMustBePositive.message).optional(),
   colors: z.string().optional(),
-  salePrice: z.number().nonnegative(ErrSalePriceMustBeNonnegative).optional(),
+  salePrice: z
+    .number()
+    .nonnegative(ErrSalePriceMustBeNonnegative.message)
+    .optional(),
   quantity: z
     .number()
     .int()
-    .nonnegative(ErrQuantityMustBeNonnegative)
+    .nonnegative(ErrQuantityMustBeNonnegative.message)
     .optional(),
-  brandId: z.string().uuid(ErrBrandIdMustBeValidUUID).optional(),
-  categoryId: z.string().uuid(ErrCategoryIdMustBeValidUUID).optional(),
+  brandId: z.string().uuid(ErrBrandIdMustBeValidUUID.message).optional(),
+  categoryId: z.string().uuid(ErrCategoryIdMustBeValidUUID.message).optional(),
   content: z.string().optional(),
   description: z.string().optional(),
 });
@@ -43,10 +46,10 @@ export const ProductUpdateSchema = z.object({
 export type ProductUpdateDTO = z.infer<typeof ProductUpdateSchema>;
 
 export const ProductCondSchema = z.object({
-  fromPrice: z.number().positive(ErrFromPriceMustBePositive).optional(),
-  toPrice: z.number().positive(ErrToPriceMustBePositive).optional(),
-  brandId: z.string().uuid(ErrBrandIdMustBeValidUUID).optional(),
-  categoryId: z.string().uuid(ErrCategoryIdMustBeValidUUID).optional(),
+  fromPrice: z.number().positive(ErrFromPriceMustBePositive.message).optional(),
+  toPrice: z.number().positive(ErrToPriceMustBePositive.message).optional(),
+  brandId: z.string().uuid(ErrBrandIdMustBeValidUUID.message).optional(),
+  categoryId: z.string().uuid(ErrCategoryIdMustBeValidUUID.message).optional(),
 });
 
 export type ProductCondDTO = z.infer<typeof ProductCondSchema>;

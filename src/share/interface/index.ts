@@ -47,7 +47,7 @@ export interface Requester extends TokenPayload {}
 export interface ITokenProvider {
   generateAccessToken(payload: TokenPayload): Promise<string>;
   generateRefreshToken(payload: TokenPayload): Promise<string>;
-  verifyToken(token: string,secretKey:string): Promise<TokenPayload | null>;
+  verifyToken(token: string, secretKey: string): Promise<TokenPayload | null>;
 }
 
 // Authorization

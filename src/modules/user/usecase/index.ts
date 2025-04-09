@@ -27,8 +27,10 @@ import {
 import {
   ErrEmailExisted,
   ErrInvalidEmailAndPassword,
+  ErrInvalidToken,
   ErrUserInactivated,
 } from "../model/error";
+import { AppError } from "@share/app-error";
 
 export class UserUseCase implements IUserUseCase {
   constructor(
@@ -44,8 +46,32 @@ export class UserUseCase implements IUserUseCase {
     return user;
   }
 
-  verifyToken(token: string): Promise<TokenPayload> {
-    throw new Error("Method not implemented.");
+  async verifyToken(token: string): Promise<TokenPayload> {
+    const payload = await jwtProvider.verifyToken(
+      token,
+      process.env.JWT_SECRET_KEY_ACCESS as string
+    );
+
+    if (!payload) {
+      throw ErrInvalidToken;
+    }
+
+    const user = await this.repository.get(payload.sub);
+    if (!user) {
+      throw ErrDataNotFound;
+    }
+
+    if (
+      user.status === Status.DELETED ||
+      user.status === Status.INACTIVE ||
+      user.status === Status.BANNED
+    ) {
+      throw ErrUserInactivated;
+    }
+
+    const mappedRole =
+      user.role === Role.ADMIN ? UserRole.ADMIN : UserRole.USER;
+    return { sub: user.id, role: mappedRole };
   }
 
   async login(data: UserLoginDTO): Promise<UserToken> {
@@ -54,7 +80,9 @@ export class UserUseCase implements IUserUseCase {
     // 1. Find user with email from DTO
     const user = await this.repository.findByCond({ email: dto.email });
     if (!user) {
-      throw ErrInvalidEmailAndPassword;
+      throw AppError.from(ErrInvalidEmailAndPassword, 400).withLog(
+        "Email not found"
+      );
     }
 
     // 2. Check password
@@ -63,11 +91,13 @@ export class UserUseCase implements IUserUseCase {
       user.password
     );
     if (!isMatch) {
-      throw ErrInvalidEmailAndPassword;
+      throw AppError.from(ErrInvalidEmailAndPassword, 400).withLog(
+        "Password is not correct"
+      );
     }
 
     if (user.status === Status.DELETED || user.status === Status.INACTIVE) {
-      throw ErrUserInactivated;
+      throw AppError.from(ErrUserInactivated, 400);
     }
 
     // 3. Return token

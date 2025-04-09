@@ -9,8 +9,13 @@ import { GetBrandDetailQuery } from "./usecase/get-brand-detail";
 import { UpdateBrandHandler } from "./usecase/update-brand";
 import { DeleteBrandHandler } from "./usecase/delete-brand";
 import { GetListBrandQuery } from "./usecase/get-list-brand";
+import { ServiceContext } from "@share/interface/service-context";
+import { UserRole } from "@share/interface";
 
-export const setupBrandHexagon = (sequelize: Sequelize) => {
+export const setupBrandHexagon = (
+  sequelize: Sequelize,
+  sctx: ServiceContext
+) => {
   init(sequelize);
 
   const repository = new MySQLBrandRepository(sequelize);
@@ -27,10 +32,28 @@ export const setupBrandHexagon = (sequelize: Sequelize) => {
     listCmdHandler
   );
   const router = Router();
-  router.get("/brands", httpService.listBrandsApi.bind(httpService));
+  const mdlFactory = sctx.mdlFactory;
+  const adminChecker = mdlFactory.allowRoles([UserRole.ADMIN]);
+  router.get(
+    "/brands",
+    adminChecker,
+    httpService.listBrandsApi.bind(httpService)
+  );
   router.get("/brands/:id", httpService.getDetailBrandAPI.bind(httpService));
-  router.patch("/brands/:id", httpService.updateBrandApi.bind(httpService));
-  router.post("/brands", httpService.createANewBrandApi.bind(httpService));
-  router.delete("/brands/:id", httpService.deleteBrandApi.bind(httpService));
+  router.patch(
+    "/brands/:id",
+    adminChecker,
+    httpService.updateBrandApi.bind(httpService)
+  );
+  router.post(
+    "/brands",
+    adminChecker,
+    httpService.createANewBrandApi.bind(httpService)
+  );
+  router.delete(
+    "/brands/:id",
+    adminChecker,
+    httpService.deleteBrandApi.bind(httpService)
+  );
   return router;
 };

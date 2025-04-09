@@ -25,14 +25,8 @@ export class UserHTTPService extends BaseHttpService<
   }
 
   async login(req: Request, res: Response) {
-    try {
-      const token = await this.usecase.login(req.body);
-      res.status(200).json({ data: token });
-    } catch (error) {
-      res.status(400).json({
-        message: (error as Error).message,
-      });
-    }
+    const token = await this.usecase.login(req.body);
+    res.status(200).json({ data: token });
   }
 
   async profile(req: Request, res: Response) {
@@ -59,6 +53,17 @@ export class UserHTTPService extends BaseHttpService<
 
       const { salt, password, ...otherProps } = user;
       res.status(200).json({ data: otherProps });
+    } catch (error) {
+      res.status(400).json({
+        message: (error as Error).message,
+      });
+    }
+  }
+  async introspectAPI(req: Request, res: Response) {
+    try {
+      const { token } = req.body;
+      const result = await this.usecase.verifyToken(token);
+      res.status(200).json({ data: result });
     } catch (error) {
       res.status(400).json({
         message: (error as Error).message,
