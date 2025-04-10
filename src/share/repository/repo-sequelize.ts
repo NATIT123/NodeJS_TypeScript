@@ -16,6 +16,9 @@ export abstract class BaseRepositorySequelize<Entity, Cond, UpdateDTO>
     readonly cmdRepo: ICommandRepository<Entity, UpdateDTO>,
     readonly schema: any
   ) {}
+  async listByIds(ids: string[]): Promise<Entity[]> {
+    return await this.queryRepo.listByIds(ids);
+  }
 
   async get(id: string): Promise<Entity | null> {
     return await this.queryRepo.get(id);
@@ -46,6 +49,28 @@ export abstract class BaseQueryRepositorySequelize<Entity, Cond>
   implements IQueryRepository<Entity, Cond>
 {
   constructor(readonly sequelize: Sequelize, readonly modelName: string) {}
+  async listByIds(ids: string[]): Promise<Entity[]> {
+    const rows = await this.sequelize.models[this.modelName].findAll({
+      where: {
+        id: {
+          [Op.in]: ids,
+        },
+        status: {
+          [Op.ne]: ModelStatus.DELETED,
+        },
+      },
+    });
+    return rows.map((row) => {
+      const persistenceData = row.get({ plain: true });
+      const { created_at, updated_at, ...props } = persistenceData;
+
+      return {
+        ...props,
+        createdAt: persistenceData.created_at,
+        updatedAt: persistenceData.updated_at,
+      } as Entity;
+    });
+  }
 
   async get(id: string): Promise<Entity | null> {
     const data = await this.sequelize.models[this.modelName].findByPk(id);

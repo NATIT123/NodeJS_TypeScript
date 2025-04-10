@@ -12,6 +12,7 @@ import {
 
 export const ProductCreateSchema = z.object({
   name: z.string().min(2, ErrNameMustBeAtLeast2Characters.message),
+  images:z.array(z.string()).nullable(),
   price: z.number().positive(ErrPriceMustBePositive.message),
   colors: z.string().optional(),
   salePrice: z.number().nonnegative(ErrSalePriceMustBeNonnegative.message),
@@ -26,6 +27,7 @@ export type ProductCreateDTO = z.infer<typeof ProductCreateSchema>;
 
 export const ProductUpdateSchema = z.object({
   name: z.string().min(2, ErrNameMustBeAtLeast2Characters.message).optional(),
+  images:z.array(z.string()).nullable(),
   price: z.number().positive(ErrPriceMustBePositive.message).optional(),
   colors: z.string().optional(),
   salePrice: z

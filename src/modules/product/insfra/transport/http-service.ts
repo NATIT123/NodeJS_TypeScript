@@ -1,14 +1,29 @@
-import { IBrandQueryRepository, ICategoryQueryRepository, IProductUseCase } from "@modules/product/interface";
-import { ProductCondDTO, ProductCreateDTO, ProductUpdateDTO } from "@modules/product/model/dto";
+import { IQueryRepository } from "@/share/interface";
+import {
+  IBrandQueryRepository,
+  ICategoryQueryRepository,
+  IProductUseCase,
+} from "@modules/product/interface";
+import {
+  ProductCondDTO,
+  ProductCreateDTO,
+  ProductUpdateDTO,
+} from "@modules/product/model/dto";
 import { Product } from "@modules/product/model/product";
 import { BaseHttpService } from "@share/transport/http-server";
 import { Request, Response } from "express";
 
-export class ProductHTTPService extends BaseHttpService<Product, ProductCreateDTO, ProductUpdateDTO, ProductCondDTO> {
+export class ProductHTTPService extends BaseHttpService<
+  Product,
+  ProductCreateDTO,
+  ProductUpdateDTO,
+  ProductCondDTO
+> {
   constructor(
-    useCase: IProductUseCase, 
+    useCase: IProductUseCase,
     private readonly productBrandRepository: IBrandQueryRepository,
-    private readonly productCategoryRepository: ICategoryQueryRepository
+    private readonly productCategoryRepository: ICategoryQueryRepository,
+    private readonly productQueryRepo: IQueryRepository<Product, ProductCondDTO>
   ) {
     super(useCase);
   }
@@ -20,17 +35,19 @@ export class ProductHTTPService extends BaseHttpService<Product, ProductCreateDT
       const result = await this.useCase.getDetail(id);
 
       const brand = await this.productBrandRepository.get(result!.brandId!);
-      
+
       if (brand) {
         result!.brand = brand!;
       }
 
-      const category = await this.productCategoryRepository.get(result!.categoryId!);
-      
+      const category = await this.productCategoryRepository.get(
+        result!.categoryId!
+      );
+
       if (category) {
         result!.category = category!;
       }
-      
+
       res.status(200).json({ data: result });
     } catch (error) {
       res.status(400).json({
@@ -38,5 +55,12 @@ export class ProductHTTPService extends BaseHttpService<Product, ProductCreateDT
       });
     }
   }
-}
 
+  async listProductByIds(req: Request, res: Response) {
+    const { ids } = req.body;
+
+    const result = await this.productQueryRepo.listByIds(ids);
+
+    res.status(200).json({ data: result });
+  }
+}

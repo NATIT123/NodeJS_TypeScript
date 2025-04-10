@@ -38,7 +38,8 @@ export function setupProductHexagon(
   const productHttpService = new ProductHTTPService(
     productUseCase,
     productBrandRepository,
-    productCategoryRepository
+    productCategoryRepository,
+    productRepository
   );
 
   const router = Router();
@@ -67,6 +68,11 @@ export function setupProductHexagon(
     "/products/:id",
     adminChecker,
     productHttpService.deleteAPI.bind(productHttpService)
+  );
+
+  router.post(
+    "/rpc/products-by-ids",
+    productHttpService.listProductByIds.bind(productHttpService)
   );
 
   return router;

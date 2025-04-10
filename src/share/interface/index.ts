@@ -8,6 +8,7 @@ export interface IQueryRepository<Entity, Cond> {
   get(id: string): Promise<Entity | null>;
   findByCond(cond: Cond): Promise<Entity | null>;
   list(cond: Cond, paging: PagingDTO): Promise<Entity[]>;
+  listByIds(ids: string[]): Promise<Entity[]>;
 }
 
 export interface ICommandRepository<Entity, UpdateDTO> {

@@ -1,17 +1,25 @@
 import { ModelStatus } from "@share/model/base-model";
-import { z } from 'zod';
-import { ErrBrandIdMustBeValidUUID, ErrCategoryIdMustBeValidUUID, ErrNameMustBeAtLeast2Characters, ErrPriceMustBePositive, ErrQuantityMustBeNonnegative, ErrSalePriceMustBeNonnegative } from "./error";
+import { z } from "zod";
+import {
+  ErrBrandIdMustBeValidUUID,
+  ErrCategoryIdMustBeValidUUID,
+  ErrNameMustBeAtLeast2Characters,
+  ErrPriceMustBePositive,
+  ErrQuantityMustBeNonnegative,
+  ErrSalePriceMustBeNonnegative,
+} from "./error";
 
 export enum ProductGender {
-  MALE = 'male',
-  FEMALE = 'female',
-  UNISEX = 'unisex'
+  MALE = "male",
+  FEMALE = "female",
+  UNISEX = "unisex",
 }
 
 export const ProductSchema = z.object({
   id: z.string().uuid(),
   name: z.string().min(2, ErrNameMustBeAtLeast2Characters.message),
   gender: z.nativeEnum(ProductGender),
+  images: z.array(z.string()).nullable(),
   price: z.number().positive(ErrPriceMustBePositive.message),
   salePrice: z.number().nonnegative(ErrSalePriceMustBeNonnegative.message),
   colors: z.string().optional(),
@@ -27,7 +35,10 @@ export const ProductSchema = z.object({
   updatedAt: z.date(),
 });
 
-export type Product = z.infer<typeof ProductSchema> & {category?: ProductCategory, brand?: ProductBrand};
+export type Product = z.infer<typeof ProductSchema> & {
+  category?: ProductCategory;
+  brand?: ProductBrand;
+};
 
 export const ProductBrandSchema = z.object({
   id: z.string().uuid(),
@@ -42,4 +53,3 @@ export const ProductCategorySchema = z.object({
 });
 
 export type ProductCategory = z.infer<typeof ProductCategorySchema>;
-
