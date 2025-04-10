@@ -24,12 +24,22 @@ export const setupUserHexagon = (
   router.post("/authenticate", httpService.login.bind(httpService));
   router.get("/profile", httpService.profile.bind(httpService));
 
-  router.post("/users", adminChecker, httpService.createAPI.bind(httpService));
+  router.post(
+    "/users",
+    mdlFactory.auth,
+    adminChecker,
+    httpService.createAPI.bind(httpService)
+  );
   router.get("/users/:id", httpService.getDetailAPI.bind(httpService));
   router.get("/users", adminChecker, httpService.listAPI.bind(httpService));
-  router.patch("/users/:id", httpService.updateAPI.bind(httpService));
+  router.patch(
+    "/users/:id",
+    mdlFactory.auth,
+    httpService.updateAPI.bind(httpService)
+  );
   router.delete(
     "/users/:id",
+    mdlFactory.auth,
     adminChecker,
     httpService.deleteAPI.bind(httpService)
   );

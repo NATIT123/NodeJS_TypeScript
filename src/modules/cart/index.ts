@@ -8,7 +8,7 @@ import { CartUseCase } from "./usecase";
 import { CartHTTPService } from "./insfra/transport/http-service";
 import { RPCCartProductRepository } from "./insfra/repository/rpc";
 import { CartRepository } from "./insfra/repository/mysql";
-export function setupProductHexagon(
+export function setupCartHexagon(
   sequelize: Sequelize,
   sctx: ServiceContext
 ): Router {
@@ -23,32 +23,40 @@ export function setupProductHexagon(
     cartRepository,
     productRPCRepository
   );
-  const cartHTTPService = new CartHTTPService(cartUseCase);
+  const cartHTTPService = new CartHTTPService(
+    cartUseCase,
+    productRPCRepository
+  );
 
   const router = Router();
   const mdlFactory = sctx.mdlFactory;
   const adminChecker = mdlFactory.allowRoles([UserRole.ADMIN]);
+  const userChecker = mdlFactory.allowRoles([UserRole.USER]);
   router.post(
     "/carts",
-    adminChecker,
+    mdlFactory.auth,
+    userChecker,
     cartHTTPService.addProductToCartAPI.bind(cartHTTPService)
   );
   //   router.get("/carts/:id", cartHTTPService.get.bind(cartHTTPService));
-  //   router.get(
-  //     "/carts",
-  //     adminChecker,
-  //     cartHTTPService.listAPI.bind(cartHTTPService)
-  //   );
-  //   router.patch(
-  //     "/carts/:id",
-  //     adminChecker,
-  //     cartHTTPService.updateAPI.bind(cartHTTPService)
-  //   );
-  //   router.delete(
-  //     "/carts/:id",
-  //     adminChecker,
-  //     cartHTTPService.deleteAPI.bind(cartHTTPService)
-  //   );
+  router.get(
+    "/carts",
+    mdlFactory.auth,
+    userChecker,
+    cartHTTPService.listItemsAPI.bind(cartHTTPService)
+  );
+  router.patch(
+    "/carts/:id",
+    mdlFactory.auth,
+    userChecker,
+    cartHTTPService.updateItemsFromCartAPI.bind(cartHTTPService)
+  );
+  router.delete(
+    "/carts/:id",
+    mdlFactory.auth,
+    userChecker,
+    cartHTTPService.removeProductFromCartAPI.bind(cartHTTPService)
+  );
 
   return router;
 }

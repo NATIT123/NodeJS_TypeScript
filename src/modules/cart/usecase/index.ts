@@ -1,4 +1,3 @@
-import { PagingDTO } from "@/share/model/paging";
 import {
   ICartCommandRepository,
   ICartQueryRepository,
@@ -14,11 +13,12 @@ import {
   UpdateCartItemDTO,
 } from "../model";
 import {
+  ErrCartItemNotFound,
   ErrProductNotEnoughQuantity,
   ErrProductNotFound,
 } from "../model/error";
 import { v7 } from "uuid";
-import { AppError } from "@/share/app-error";
+import { AppError, ErrForbidden } from "@share/app-error";
 
 export class CartUseCase implements ICartUseCase {
   constructor(
@@ -47,10 +47,12 @@ export class CartUseCase implements ICartUseCase {
       const newQuantity = existingItem.quantity + quantity;
       if (product!.quantity < newQuantity)
         throw AppError.from(ErrProductNotEnoughQuantity, 400);
-      const updatedItem = {
+
+      await this.cartCommandRepo.update(existingItem.id, {
         ...existingItem,
-        quantity: existingItem.quantity + 1,
-      };
+        quantity: newQuantity,
+        updatedAt: new Date(),
+      });
     } else {
       if (quantity > product!.quantity)
         throw AppError.from(ErrProductNotEnoughQuantity, 400);
@@ -72,13 +74,29 @@ export class CartUseCase implements ICartUseCase {
   getDetailCart(id: string): Promise<CartItem | null> {
     throw new Error("Method not implemented.");
   }
-  getListCarts(cond: CartItemConDTO, paging: PagingDTO): Promise<CartItem[]> {
-    throw new Error("Method not implemented.");
+  async getListCarts(requesterId: string): Promise<CartItem[] | null> {
+    const items = await this.cartQueryRepo.listItems(requesterId);
+
+    ///1Get cart products by ids
+
+    return items;
   }
   updateCart(id: string, data: UpdateCartItemDTO): Promise<boolean> {
     throw new Error("Method not implemented.");
   }
-  deleteCart(id: string): Promise<boolean> {
-    throw new Error("Method not implemented.");
+  async removeProductFromCart(
+    id: string,
+    requesterId: string
+  ): Promise<boolean> {
+    const existingItem = await this.cartQueryRepo.get(id);
+    if (!existingItem) {
+      throw AppError.from(ErrCartItemNotFound, 400);
+    }
+
+    if (existingItem.userId !== requesterId) {
+      throw ErrForbidden.withLog("This item not belong to this users");
+    }
+    await this.cartCommandRepo.delete(id, false);
+    return true;
   }
 }

@@ -36,6 +36,7 @@ export const setupCategoryHexagon = (
   const adminChecker = mdlFactory.allowRoles([UserRole.ADMIN]);
   router.get(
     "/categories",
+    mdlFactory.auth,
     adminChecker,
     httpService.listCategoriesApi.bind(httpService)
   );
@@ -43,14 +44,21 @@ export const setupCategoryHexagon = (
     "/categories/:id",
     httpService.getDetailCategoryAPI.bind(httpService)
   );
-  router.patch("/categories/:id", adminChecker, updateCategoryApi);
+  router.patch(
+    "/categories/:id",
+    mdlFactory.auth,
+    adminChecker,
+    updateCategoryApi
+  );
   router.post(
     "/categories",
+    mdlFactory.auth,
     adminChecker,
     httpService.createANewCategoryApi.bind(httpService)
   );
   router.delete(
     "/categories/:id",
+    mdlFactory.auth,
     adminChecker,
     httpService.deleteCategoryApi.bind(httpService)
   );

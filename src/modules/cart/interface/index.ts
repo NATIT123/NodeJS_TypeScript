@@ -10,9 +10,9 @@ import {
 export interface ICartUseCase {
   addProductToCart(data: AddCartItemDTO): Promise<boolean>;
   getDetailCart(id: string): Promise<CartItem | null>;
-  getListCarts(cond: CartItemConDTO, paging: PagingDTO): Promise<CartItem[]>;
+  getListCarts(requesterId: string): Promise<CartItem[] | null>;
   updateCart(id: string, data: UpdateCartItemDTO): Promise<boolean>;
-  deleteCart(id: string): Promise<boolean>;
+  removeProductFromCart(id: string, requesterId: string): Promise<boolean>;
 }
 
 export interface ICartQueryRepository {

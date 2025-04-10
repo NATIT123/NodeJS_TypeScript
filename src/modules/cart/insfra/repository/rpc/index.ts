@@ -1,13 +1,13 @@
 import {
   ICartQueryRepository,
   IProductQueryRepository,
-} from "@/modules/cart/interface";
+} from "@modules/cart/interface";
 import {
   CartItem,
   CartItemConDTO,
   CartProduct,
   cartProductSchema,
-} from "@/modules/cart/model";
+} from "@modules/cart/model";
 import { PagingDTO } from "@/share/model/paging";
 
 import axios from "axios";
@@ -16,9 +16,11 @@ export class RPCCartProductRepository implements IProductQueryRepository {
   constructor(private readonly productServiceUrl: string) {}
   async findById(id: string): Promise<CartProduct | null> {
     try {
-      const { data } = await axios.post(
+      const { data } = await axios.get(
         `${this.productServiceUrl}/v1/products/${id}`
       );
+
+      console.log(data);
 
       const product = cartProductSchema.parse(data.data);
 

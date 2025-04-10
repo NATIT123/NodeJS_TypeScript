@@ -13,6 +13,7 @@ import { allowRoles } from "./share/middleware/check-role";
 import { UserRole } from "./share/interface";
 import { setupMiddlewares } from "./share/middleware";
 import { responseErr } from "./share/app-error";
+import { setupCartHexagon } from "./modules/cart";
 config();
 (async () => {
   sequelize
@@ -35,7 +36,7 @@ config();
   app.get(
     "/v1/protected",
     authMdl,
-    allowRoles([UserRole.ADMIN]),
+    allowRoles([UserRole.USER]),
     (req: Request, res: Response) => {
       return res.status(200).json({
         data: res.locals.requester,
@@ -53,6 +54,7 @@ config();
   app.use("/v1", setupBrandHexagon(sequelize, sctx));
   app.use("/v1", setupProductHexagon(sequelize, sctx));
   app.use("/v1", setupUserHexagon(sequelize, sctx));
+  app.use("/v1", setupCartHexagon(sequelize, sctx));
 
   app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
     responseErr(err, res);

@@ -5,8 +5,8 @@ export const cartProductSchema = z.object({
   id: z.string(),
   name: z.string(),
   images: z.array(z.string()).nullable(),
-  salePrice: z.number(),
-  price: z.number(),
+  salePrice: z.preprocess((val) => Number(val), z.number()),
+  price: z.preprocess((val) => Number(val), z.number()),
   quantity: z.number(),
 });
 
@@ -31,11 +31,9 @@ export const addCartItemDTOSchema = z.object({
 });
 
 export const cartItemCondDTOSchema = z.object({
-  userId: z.string(),
-  productId: z.string(),
+  userId: z.string().uuid().optional(),
+  productId: z.string().uuid().optional(),
   attribute: z.string().nullable().optional().default(""),
-  createdAt: z.date().optional().nullable(),
-  updatedAt: z.date().optional().nullable(),
 });
 
 export const updateCartItemDTOSchema = z.object({
@@ -43,6 +41,7 @@ export const updateCartItemDTOSchema = z.object({
   productId: z.string(),
   attribute: z.string().nullable().optional().default(""),
   quantity: z.number(),
+  updatedAt: z.date().optional().nullable(),
 });
 
 export type CartProduct = z.infer<typeof cartProductSchema>;

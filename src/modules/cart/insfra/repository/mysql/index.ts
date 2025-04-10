@@ -9,11 +9,6 @@ import {
   cartItemSchema,
   UpdateCartItemDTO,
 } from "@modules/cart/model";
-import {
-  BaseCommandRepositorySequelize,
-  BaseQueryRepositorySequelize,
-  BaseRepositorySequelize,
-} from "@share/repository/repo-sequelize";
 import { Sequelize } from "sequelize";
 
 export class CartRepository
@@ -30,12 +25,28 @@ export class CartRepository
     });
     return true;
   }
-  delete(id: string, isHard: boolean): Promise<boolean> {
-    throw new Error("Method not implemented.");
+  async delete(id: string, isHard: boolean): Promise<boolean> {
+    await this.sequelize.models[this.modelName].destroy({ where: { id } });
+    return true;
   }
-  get(id: string): Promise<CartItem | null> {
-    throw new Error("Method not implemented.");
+  async get(id: string): Promise<CartItem | null> {
+    const data = await this.sequelize.models[this.modelName].findByPk(id);
+
+    if (!data) {
+      return null;
+    }
+
+    const persistenceData = data.get({ plain: true });
+
+    return {
+      ...persistenceData,
+      createdAt: persistenceData.created_at.toISOString(),
+      updatedAt: persistenceData.updated_at.toISOString(),
+    } as CartItem;
+
+    // return CategorySchema.parse(data.get({ plain: true }));
   }
+
   async listItems(userId: string): Promise<CartItem[]> {
     const items = await this.sequelize.models[this.modelName].findAll({
       where: { userId },
@@ -52,7 +63,27 @@ export class CartRepository
       } as CartItem;
     });
   }
-  findByCond(cond: CartItemConDTO): Promise<CartItem | null> {
-    throw new Error("Method not implemented.");
+  async findByCond(cond: CartItemConDTO): Promise<CartItem | null> {
+    const data = await this.sequelize.models[this.modelName].findOne({
+      where: {
+        userId: cond.userId,
+        productId: cond.productId,
+        attribute: cond.attribute,
+      },
+    });
+
+    if (!data) {
+      return null;
+    }
+
+    const persistenceData = data.get({ plain: true });
+
+    console.log(persistenceData);
+
+    return {
+      ...persistenceData,
+      createdAt: persistenceData.created_at.toISOString(),
+      updatedAt: persistenceData.updated_at.toISOString(),
+    } as CartItem;
   }
 }

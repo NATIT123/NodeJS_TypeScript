@@ -36,22 +36,26 @@ export const setupBrandHexagon = (
   const adminChecker = mdlFactory.allowRoles([UserRole.ADMIN]);
   router.get(
     "/brands",
+    mdlFactory.auth,
     adminChecker,
     httpService.listBrandsApi.bind(httpService)
   );
   router.get("/brands/:id", httpService.getDetailBrandAPI.bind(httpService));
   router.patch(
     "/brands/:id",
+    mdlFactory.auth,
     adminChecker,
     httpService.updateBrandApi.bind(httpService)
   );
   router.post(
     "/brands",
+    mdlFactory.auth,
     adminChecker,
     httpService.createANewBrandApi.bind(httpService)
   );
   router.delete(
     "/brands/:id",
+    mdlFactory.auth,
     adminChecker,
     httpService.deleteBrandApi.bind(httpService)
   );

@@ -47,6 +47,7 @@ export function setupProductHexagon(
   const adminChecker = mdlFactory.allowRoles([UserRole.ADMIN]);
   router.post(
     "/products",
+    mdlFactory.auth,
     adminChecker,
     productHttpService.createAPI.bind(productHttpService)
   );
@@ -56,22 +57,26 @@ export function setupProductHexagon(
   );
   router.get(
     "/products",
+    mdlFactory.auth,
     adminChecker,
     productHttpService.listAPI.bind(productHttpService)
   );
   router.patch(
     "/products/:id",
+    mdlFactory.auth,
     adminChecker,
     productHttpService.updateAPI.bind(productHttpService)
   );
   router.delete(
     "/products/:id",
+    mdlFactory.auth,
     adminChecker,
     productHttpService.deleteAPI.bind(productHttpService)
   );
 
   router.post(
     "/rpc/products-by-ids",
+    mdlFactory.auth,
     productHttpService.listProductByIds.bind(productHttpService)
   );
 
