@@ -45,6 +45,7 @@ export function setupProductHexagon(
   const router = Router();
   const mdlFactory = sctx.mdlFactory;
   const adminChecker = mdlFactory.allowRoles([UserRole.ADMIN]);
+  const userChecker = mdlFactory.allowRoles([UserRole.USER]);
   router.post(
     "/products",
     mdlFactory.auth,
@@ -76,7 +77,6 @@ export function setupProductHexagon(
 
   router.post(
     "/rpc/products-by-ids",
-    mdlFactory.auth,
     productHttpService.listProductByIds.bind(productHttpService)
   );
 

@@ -11,7 +11,7 @@ export interface ICartUseCase {
   addProductToCart(data: AddCartItemDTO): Promise<boolean>;
   getDetailCart(id: string): Promise<CartItem | null>;
   getListCarts(requesterId: string): Promise<CartItem[] | null>;
-  updateCart(id: string, data: UpdateCartItemDTO): Promise<boolean>;
+  updateCart(dto: UpdateCartItemDTO[], requesterId: string): Promise<boolean>;
   removeProductFromCart(id: string, requesterId: string): Promise<boolean>;
 }
 
@@ -24,10 +24,11 @@ export interface ICartQueryRepository {
 export interface ICartCommandRepository {
   insert(data: CartItem): Promise<boolean>;
   update(id: string, data: UpdateCartItemDTO): Promise<boolean>;
+  updateMany(dto: UpdateCartItemDTO[], userId: string): Promise<boolean>;
   delete(id: string, isHard: boolean): Promise<boolean>;
 }
 
 export interface IProductQueryRepository {
   findById(id: string): Promise<CartProduct | null>;
-  findByIds(ids: string[]): Promise<CartProduct[]>;
+  findByIds(ids: string[]): Promise<CartProduct[] | null>;
 }

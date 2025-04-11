@@ -15,6 +15,23 @@ export class CartRepository
   implements ICartQueryRepository, ICartCommandRepository
 {
   constructor(readonly sequelize: Sequelize, readonly modelName: string) {}
+  async updateMany(
+    dtos: UpdateCartItemDTO[],
+    userId: string
+  ): Promise<boolean> {
+    await this.sequelize.transaction(async (t) => {
+      for (let i = 0; i < dtos.length; i++) {
+        const { productId, attribute, quantity } = dtos[i];
+        await this.sequelize.models[this.modelName].update(
+          { quantity },
+          { where: { productId, userId, attribute }, transaction: t }
+        );
+      }
+      return true;
+    });
+
+    return true;
+  }
   async insert(data: CartItem): Promise<boolean> {
     await this.sequelize.models[this.modelName].create(data);
     return true;
@@ -77,8 +94,6 @@ export class CartRepository
     }
 
     const persistenceData = data.get({ plain: true });
-
-    console.log(persistenceData);
 
     return {
       ...persistenceData,

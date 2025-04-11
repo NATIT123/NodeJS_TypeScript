@@ -19,7 +19,7 @@ export class CartHTTPService {
   }
 
   async removeProductFromCartAPI(req: Request, res: Response) {
-    const requester = res.locals.requesters;
+    const requester = res.locals.requester;
     const { sub: userId } = requester;
     const { id } = req.params;
 
@@ -28,15 +28,16 @@ export class CartHTTPService {
   }
 
   async updateItemsFromCartAPI(req: Request, res: Response) {
-    const requester = res.locals.requesters;
-    const { sub: userId } = requester;
-    const { id } = req.params;
+    const requester = res.locals.requester;
 
+    const { sub: userId } = requester;
+    const dto = req.body;
+    await this.cartUseCase.updateCart(dto, userId);
     res.status(200).json({ data: true });
   }
 
   async listItemsAPI(req: Request, res: Response) {
-    const requester = res.locals.requesters;
+    const requester = res.locals.requester;
     const { sub: userId } = requester;
     const result = await this.cartUseCase.getListCarts(userId);
     res.status(200).json({ data: result });

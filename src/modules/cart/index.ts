@@ -46,7 +46,7 @@ export function setupCartHexagon(
     cartHTTPService.listItemsAPI.bind(cartHTTPService)
   );
   router.patch(
-    "/carts/:id",
+    "/carts",
     mdlFactory.auth,
     userChecker,
     cartHTTPService.updateItemsFromCartAPI.bind(cartHTTPService)

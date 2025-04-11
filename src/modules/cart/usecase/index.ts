@@ -11,6 +11,7 @@ import {
   CartItemConDTO,
   CartProduct,
   UpdateCartItemDTO,
+  updateCartItemDTOSchema,
 } from "../model";
 import {
   ErrCartItemNotFound,
@@ -43,6 +44,7 @@ export class CartUseCase implements ICartUseCase {
       productId,
       attribute,
     });
+
     if (existingItem) {
       const newQuantity = existingItem.quantity + quantity;
       if (product!.quantity < newQuantity)
@@ -77,12 +79,61 @@ export class CartUseCase implements ICartUseCase {
   async getListCarts(requesterId: string): Promise<CartItem[] | null> {
     const items = await this.cartQueryRepo.listItems(requesterId);
 
-    ///1Get cart products by ids
+    const listIds: string[] = items.map((cart) => cart.productId);
 
-    return items;
+    const listProducts: CartProduct[] | null =
+      await this.productQueryRepo.findByIds(listIds);
+
+    const myProducts: { [key: string]: CartProduct } = {};
+
+    if (listProducts && listProducts.length > 0) {
+      listProducts.forEach((item) => {
+        if (item.id) {
+          myProducts[item.id] = item as CartProduct;
+        }
+      });
+    }
+
+    const result = items.map((cart) => {
+      let product = null;
+      if (listProducts) {
+        product = myProducts[cart.productId as string] ?? null;
+      }
+
+      return {
+        ...cart,
+        product,
+      } as CartItem;
+    });
+
+    return result;
   }
-  updateCart(id: string, data: UpdateCartItemDTO): Promise<boolean> {
-    throw new Error("Method not implemented.");
+  async updateCart(
+    dto: UpdateCartItemDTO[],
+    requesterId: string
+  ): Promise<boolean> {
+    dto = dto.map((item) => updateCartItemDTOSchema.parse(item));
+    const productIds = dto.map((item) => item.productId);
+
+    const products = await this.productQueryRepo.findByIds(productIds);
+    const productQuantityMap = new Map<string, number>();
+
+    products?.forEach((product) =>
+      productQuantityMap.set(product.id, product.quantity)
+    );
+
+    dto.forEach((item) => {
+      const userWantQuantity = item.quantity;
+      const currentQuantity = productQuantityMap.get(item.productId) || 0;
+
+      if (userWantQuantity > currentQuantity) {
+        throw AppError.from(ErrProductNotEnoughQuantity, 400);
+      }
+    });
+
+    await this.cartCommandRepo.updateMany(dto, requesterId);
+
+    return true;
   }
   async removeProductFromCart(
     id: string,

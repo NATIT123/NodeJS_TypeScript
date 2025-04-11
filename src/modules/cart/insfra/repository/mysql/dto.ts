@@ -11,11 +11,6 @@ export function init(sequelize: Sequelize) {
         type: DataTypes.STRING,
         primaryKey: true,
       },
-
-      name: {
-        type: DataTypes.STRING,
-        allowNull: false,
-      },
       attribute: {
         type: DataTypes.STRING,
         allowNull: false,

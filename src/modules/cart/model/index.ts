@@ -37,7 +37,6 @@ export const cartItemCondDTOSchema = z.object({
 });
 
 export const updateCartItemDTOSchema = z.object({
-  userId: z.string(),
   productId: z.string(),
   attribute: z.string().nullable().optional().default(""),
   quantity: z.number(),

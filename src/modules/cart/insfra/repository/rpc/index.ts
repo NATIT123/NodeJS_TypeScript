@@ -20,8 +20,6 @@ export class RPCCartProductRepository implements IProductQueryRepository {
         `${this.productServiceUrl}/v1/products/${id}`
       );
 
-      console.log(data);
-
       const product = cartProductSchema.parse(data.data);
 
       return {
@@ -37,7 +35,7 @@ export class RPCCartProductRepository implements IProductQueryRepository {
       return null;
     }
   }
-  async findByIds(ids: string[]): Promise<CartProduct[]> {
+  async findByIds(ids: string[]): Promise<CartProduct[] | null> {
     try {
       const { data } = await axios.post(
         `${this.productServiceUrl}/v1/rpc/products-by-ids`,
@@ -56,7 +54,7 @@ export class RPCCartProductRepository implements IProductQueryRepository {
       }));
     } catch (error) {
       console.error(error);
-      return [];
+      return null;
     }
   }
 }
